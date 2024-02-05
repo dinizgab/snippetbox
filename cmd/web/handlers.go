@@ -15,7 +15,16 @@ func (a Application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("This is the snippetCreate route!!!"))
+	title := ":D titulo :D"
+	content := "12341234"
+	expires := 7
+
+	id, err := a.snippets.Insert(title, content, expires)
+	if err != nil {
+		a.serverError(w, err)
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 }
 
 func (a Application) snippetView(w http.ResponseWriter, r *http.Request) {

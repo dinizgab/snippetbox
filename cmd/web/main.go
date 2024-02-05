@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dinizgab/snippetbox/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type Application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -27,6 +29,7 @@ func main() {
 	app := &Application{
 		infoLog:  infoLog,
 		errorLog: errorLog,
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	srv := &http.Server{
@@ -44,10 +47,10 @@ func openDB(connString string) (*sql.DB, error) {
 	db, err := sql.Open(
 		"mysql", connString,
 	)
+
 	if err != nil {
 		return nil, err
 	}
-
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
