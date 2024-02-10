@@ -8,8 +8,8 @@ func (a Application) routes() *http.ServeMux {
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.HandleFunc("/", a.home)
-	mux.HandleFunc("/snippet/view", a.snippetView)
-	mux.HandleFunc("/snippet/create", a.snippetCreate)
+	mux.HandleFunc("/snippets/view", a.snippetView)
+	mux.HandleFunc("/snippets/create", a.snippetCreate)
 
 	return mux
 }

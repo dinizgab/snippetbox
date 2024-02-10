@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -37,7 +36,6 @@ func (a Application) snippetView(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
 	snippet, err := a.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecords) {
@@ -49,26 +47,10 @@ func (a Application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/pages/base.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-		"./ui/html/pages/view.tmpl.html",
-	}
+	data := a.newTemplateData(r)
+    data.Snippet = snippet
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		a.serverError(w, err)
-		return
-	}
-
-	snippetData := &templateData{Snippet: snippet}
-
-	err = ts.ExecuteTemplate(w, "base", snippetData)
-	if err != nil {
-		a.serverError(w, err)
-	}
-
-	fmt.Fprintf(w, "snippet: %+v", snippet)
+    a.render(w, http.StatusOK, "view.tmpl.html", data)
 }
 
 func (a Application) home(w http.ResponseWriter, r *http.Request) {
@@ -81,30 +63,12 @@ func (a Application) home(w http.ResponseWriter, r *http.Request) {
 	latestSnippets, err := a.snippets.Latest()
 	if err != nil {
 		a.serverError(w, err)
+        
+        return
 	}
 
-	for _, snip := range latestSnippets {
-		fmt.Fprintf(w, "%+v\n", snip)
-	}
+    data := a.newTemplateData(r)
+    data.Snippets = latestSnippets
 
-	// files := []string{
-	// 	"./ui/html/pages/home.tmpl.html",
-	// 	"./ui/html/pages/base.tmpl.html",
-	// 	"./ui/html/partials/nav.tmpl.html",
-	// }
-
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	a.errorLog.Println(err.Error())
-	// 	a.serverError(w, err)
-
-	// }
-
-	// err = ts.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	a.errorLog.Println(err.Error())
-	// 	a.serverError(w, err)
-	// }
-
-	w.Write([]byte("This is the home page!!!"))
+    a.render(w, http.StatusOK, "home.tmpl.html", data)
 }

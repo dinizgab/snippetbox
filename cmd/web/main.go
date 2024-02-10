@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ type Application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	snippets *models.SnippetModel
+    templateCache map[string]*template.Template
 }
 
 func main() {
@@ -23,13 +25,19 @@ func main() {
 	db, err := openDB("web:123456@/snippetbox?parseTime=true")
 	if err != nil {
 		errorLog.Fatal(err)
-	}
+    }
 	defer db.Close()
+   
+    templateCache, err := newTemplateCache()
+    if err != nil {
+        errorLog.Fatal(err) 
+    } 
 
 	app := &Application{
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		snippets: &models.SnippetModel{DB: db},
+        templateCache: templateCache,
 	}
 
 	srv := &http.Server{
